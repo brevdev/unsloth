@@ -17,6 +17,7 @@ jobs:
         with:
           scandir: './scripts'
           severity: warning
+          check_together: 'yes'
           
   docker-build:
     name: Docker Build Test

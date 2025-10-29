@@ -28,7 +28,8 @@ if [ ! -z "$NOTEBOOK_URL" ]; then
     mkdir -p /workspace/custom-notebooks
     cd /workspace/custom-notebooks
     curl -L -o "$(basename "$NOTEBOOK_URL")" "$NOTEBOOK_URL"
-    export NOTEBOOK_PATH="/workspace/custom-notebooks/$(basename "$NOTEBOOK_URL")"
+    NOTEBOOK_PATH="/workspace/custom-notebooks/$(basename "$NOTEBOOK_URL")"
+    export NOTEBOOK_PATH
     echo "Downloaded notebook to: $NOTEBOOK_PATH"
 fi
 

@@ -123,7 +123,8 @@ start_service() {
     # Check for specific configuration
     if [ "$config" != "default" ] && [ -f "configs/${config}.env" ]; then
         echo -e "${GREEN}Using configuration file: configs/${config}.env${NC}"
-        export $(cat "configs/${config}.env" | grep -v '^#' | xargs)
+        # shellcheck disable=SC2046
+        export $(grep -v '^#' "configs/${config}.env" | xargs)
     fi
     
     # Create necessary directories
