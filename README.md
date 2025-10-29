@@ -52,6 +52,18 @@ A comprehensive Docker Compose framework for running [Unsloth](https://unsloth.a
 
 3. **Access Jupyter Lab**: Open http://localhost:8888 in your browser
 
+## 🚀 Launchables
+
+
+| GPU Configuration | Brev Launchable |
+|-------------------|-------------------|
+| NVIDIA L4 x1 | [![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-34l7DWjH63aD4qwEgqRiaLeGDRb) |
+| NVIDIA L40S x1 | [![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-34l9Circ6ce2XTXfIB4eFvcaycU) |
+| NVIDIA H100 x1 | [![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-34l9gvOKRKI1f3AYZBd3JK6MmHF) |
+
+
+**Note**: Configuration automatically detects and uses all available GPUs via `gpus: all` in docker-compose.yml.
+
 ## 🏗️ Architecture
 
 This framework provides multiple ways to run Unsloth:
