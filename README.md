@@ -1,6 +1,6 @@
 ## 🟢 Unsloth on Brev
 
-[![CI](https://github.com/liveaverage/unsloth-launch/actions/workflows/ci.yml/badge.svg)](https://github.com/liveaverage/unsloth-launch/actions/workflows/ci.yml)
+[![CI](https://github.com/brevdev/unsloth/actions/workflows/ci.yml/badge.svg)](https://github.com/brevdev/unsloth/actions/workflows/ci.yml)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/r/unsloth/unsloth)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Shell](https://img.shields.io/badge/shell-bash-lightgrey.svg)](https://www.gnu.org/software/bash/)
