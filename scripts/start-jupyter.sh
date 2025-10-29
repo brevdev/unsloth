@@ -22,13 +22,14 @@ else
 fi
 
 # Check if we need to download a notebook
-if [ ! -z "$NOTEBOOK_URL" ]; then
+if [ -n "$NOTEBOOK_URL" ]; then
     echo "=== Downloading Notebook ==="
     echo "Downloading notebook from: $NOTEBOOK_URL"
     mkdir -p /workspace/custom-notebooks
     cd /workspace/custom-notebooks
-    curl -L -o "$(basename "$NOTEBOOK_URL")" "$NOTEBOOK_URL"
-    NOTEBOOK_PATH="/workspace/custom-notebooks/$(basename "$NOTEBOOK_URL")"
+    NOTEBOOK_NAME=$(basename "$NOTEBOOK_URL")
+    curl -L -o "$NOTEBOOK_NAME" "$NOTEBOOK_URL"
+    NOTEBOOK_PATH="/workspace/custom-notebooks/$NOTEBOOK_NAME"
     export NOTEBOOK_PATH
     echo "Downloaded notebook to: $NOTEBOOK_PATH"
 fi
@@ -45,20 +46,20 @@ echo "HuggingFace token: ${HF_TOKEN:+Set}"
 echo "Wandb API key: ${WANDB_API_KEY:+Set}"
 
 # Set HuggingFace token if provided
-if [ ! -z "$HF_TOKEN" ]; then
+if [ -n "$HF_TOKEN" ]; then
     echo "Setting HuggingFace token..."
     export HUGGINGFACE_HUB_TOKEN="$HF_TOKEN"
     huggingface-cli login --token "$HF_TOKEN" --add-to-git-credential
 fi
 
 # Set Wandb API key if provided
-if [ ! -z "$WANDB_API_KEY" ]; then
+if [ -n "$WANDB_API_KEY" ]; then
     echo "Setting Wandb API key..."
     export WANDB_API_KEY="$WANDB_API_KEY"
 fi
 
 # Pre-download model if specified
-if [ ! -z "$MODEL_NAME" ]; then
+if [ -n "$MODEL_NAME" ]; then
     echo "=== Pre-loading Model ==="
     echo "Pre-loading model: $MODEL_NAME"
     python -c "

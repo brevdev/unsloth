@@ -92,7 +92,7 @@ check_nvidia_support() {
         cuda_tag="$cuda_version"
     fi
     # Try running a test container with detected CUDA version
-    if docker run --rm --gpus all nvidia/cuda:${cuda_tag}-base-ubuntu20.04 nvidia-smi &> /dev/null; then
+    if docker run --rm --gpus all nvidia/cuda:"${cuda_tag}"-base-ubuntu20.04 nvidia-smi &> /dev/null; then
         echo -e "${GREEN}✓ NVIDIA GPU support detected (docker --gpus with CUDA $cuda_tag works)${NC}"
         return 0
     fi
@@ -123,8 +123,10 @@ start_service() {
     # Check for specific configuration
     if [ "$config" != "default" ] && [ -f "configs/${config}.env" ]; then
         echo -e "${GREEN}Using configuration file: configs/${config}.env${NC}"
-        # shellcheck disable=SC2046
-        export $(grep -v '^#' "configs/${config}.env" | xargs)
+        set -a
+        # shellcheck source=/dev/null
+        source "configs/${config}.env"
+        set +a
     fi
     
     # Create necessary directories
