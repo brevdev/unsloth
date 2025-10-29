@@ -1,0 +1,113 @@
+
+services:
+  unsloth-jupyter:
+    # Option 1: Use official Unsloth image
+    image: unsloth/unsloth:latest
+
+    # Option 2: Build a custom image (uncomment to use a Dockerfile that pre-installs CUDA PyTorch)
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+
+    container_name: ${CONTAINER_NAME:-unsloth-notebook}
+    restart: unless-stopped
+
+    # Ensure GPU access
+    gpus: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: ${GPU_COUNT:-all}
+              capabilities: [gpu]
+          memory: ${MEMORY_RESERVATION:-8G}
+        limits:
+          memory: ${MEMORY_LIMIT:-16G}
+
+    # All configuration via environment variables with sensible defaults
+    # Override any variable: export VAR=value before running docker-compose
+    
+    environment:
+      # Unsloth / Jupyter
+      JUPYTER_PORT: ${JUPYTER_PORT:-8888}
+      JUPYTER_PASSWORD: ${JUPYTER_PASSWORD:-}
+      JUPYTER_TOKEN: ${JUPYTER_TOKEN:-}
+      SSH_KEY: ${SSH_KEY:-}
+      USER_PASSWORD: ${USER_PASSWORD:-unsloth2024}
+
+      NOTEBOOK_URL: ${NOTEBOOK_URL:-}
+      NOTEBOOK_PATH: ${NOTEBOOK_PATH:-}
+      AUTO_START_NOTEBOOK: ${AUTO_START_NOTEBOOK:-false}
+
+      # ML/AI tokens (optional)
+      HF_TOKEN: ${HF_TOKEN:-}
+      WANDB_API_KEY: ${WANDB_API_KEY:-}
+
+      # Model / training config
+      MODEL_NAME: ${MODEL_NAME:-}
+      MODEL_CACHE_DIR: ${MODEL_CACHE_DIR:-/workspace/models}
+      DATASET_NAME: ${DATASET_NAME:-}
+      MAX_SEQ_LENGTH: ${MAX_SEQ_LENGTH:-2048}
+      LOAD_IN_4BIT: ${LOAD_IN_4BIT:-true}
+      BATCH_SIZE: ${BATCH_SIZE:-2}
+      GRADIENT_ACCUMULATION_STEPS: ${GRADIENT_ACCUMULATION_STEPS:-4}
+      LEARNING_RATE: ${LEARNING_RATE:-2e-4}
+      NUM_TRAIN_EPOCHS: ${NUM_TRAIN_EPOCHS:-1}
+
+      # ✅ Correct NVIDIA envs for GPU userland
+      NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-all}
+      NVIDIA_DRIVER_CAPABILITIES: ${NVIDIA_DRIVER_CAPABILITIES:-compute,utility}
+
+      # (Optional) CUDA paths if you rely on them inside the image
+      # LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:-/usr/local/cuda/lib64:/usr/lib/x86_64-linux-gnu:/opt/conda/lib}
+      CUDA_HOME: ${CUDA_HOME:-/usr/local/cuda}
+      CUDA_ROOT: ${CUDA_ROOT:-/usr/local/cuda}
+      CUDA_PATH: ${CUDA_PATH:-/usr/local/cuda}
+      
+      # Let Docker/NVIDIA runtime handle GPU visibility automatically
+
+    # Improve stability/perf for PyTorch dataloaders, notebooks, etc.
+    shm_size: 2g
+    ipc: host
+
+    ports:
+      - "${JUPYTER_HOST_PORT:-8888}:${JUPYTER_PORT:-8888}"  # JupyterLab
+      - "${SSH_HOST_PORT:-2222}:22"                         # SSH
+      - "${TENSORBOARD_HOST_PORT:-6006}:6006"               # TensorBoard
+
+    volumes:
+      - ./work:/workspace/work
+      - ./custom-notebooks:/workspace/custom-notebooks
+      - ./data:/workspace/data
+      - ./models:/workspace/models
+      - ./outputs:/workspace/outputs
+      - ./scripts:/workspace/scripts
+      - ./configs:/workspace/configs
+      - ./configs/unsloth-sudoers:/etc/sudoers.d/unsloth:ro
+      - unsloth-home:/home/unsloth
+      - ${HOST_NOTEBOOK_DIR:-./custom-notebooks}:/workspace/host-notebooks
+      - ${HOST_DATA_DIR:-./data}:/workspace/host-data
+
+    working_dir: /workspace
+
+    entrypoint:
+      - /bin/bash
+      - /workspace/scripts/entrypoint-passwordless.sh
+
+    command: ${STARTUP_COMMAND:-/workspace/scripts/start-jupyter.sh}
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${JUPYTER_PORT:-8888}/api"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  unsloth-home:
+    driver: local
+
+networks:
+  default:
+    name: unsloth-network

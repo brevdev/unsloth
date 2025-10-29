@@ -1,0 +1,54 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './scripts'
+          severity: warning
+          
+  docker-build:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Test docker-compose configuration
+        run: |
+          docker compose config
+          
+      - name: Verify required files exist
+        run: |
+          test -f docker-compose.yml
+          test -f scripts/entrypoint-passwordless.sh
+          test -f configs/unsloth-sudoers
+          echo "✓ All required files present"
+          
+  syntax-check:
+    name: Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Check shell script syntax
+        run: |
+          for script in scripts/*.sh; do
+            echo "Checking $script..."
+            bash -n "$script"
+          done
+          echo "✓ All scripts have valid syntax"
+
