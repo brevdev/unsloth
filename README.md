@@ -154,10 +154,20 @@ docker compose up -d
 #### Core Settings
 - `CONTAINER_NAME`: Container name (default: `unsloth-notebook`)
 - `JUPYTER_PORT`: Jupyter port (default: `8888`)
-- `JUPYTER_PASSWORD`: Jupyter password protection
+- `JUPYTER_TOKEN`: Optional login token; a secure random token is generated on each start when unset or empty.
 - `SSH_HOST_PORT`: SSH access port (default: `2222`)
 
 #### Authentication
+Jupyter requires a token. Retrieve it locally with:
+
+```bash
+docker compose exec unsloth-jupyter cat /home/unsloth/.jupyter/jupyter_token
+```
+
+Paste the token into the Jupyter login page. The token and configuration files are
+readable only by their owner. An empty `JUPYTER_TOKEN` does not disable authentication.
+The health check uses the public login page and does not include the token.
+
 - `HF_TOKEN`: Hugging Face token for private models
 - `WANDB_API_KEY`: Weights & Biases API key
 - `SSH_KEY`: SSH public key for container access

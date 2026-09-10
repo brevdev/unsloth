@@ -31,7 +31,6 @@ services:
     environment:
       # Unsloth / Jupyter
       JUPYTER_PORT: ${JUPYTER_PORT:-8888}
-      JUPYTER_PASSWORD: ${JUPYTER_PASSWORD:-}
       JUPYTER_TOKEN: ${JUPYTER_TOKEN:-}
       SSH_KEY: ${SSH_KEY:-}
       USER_PASSWORD: ${USER_PASSWORD:-unsloth2024}
@@ -98,7 +97,7 @@ services:
     command: ${STARTUP_COMMAND:-/workspace/scripts/start-jupyter.sh}
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${JUPYTER_PORT:-8888}/api"]
+      test: ["CMD", "curl", "-f", "http://localhost:${JUPYTER_PORT:-8888}/login"]
       interval: 30s
       timeout: 10s
       retries: 3
