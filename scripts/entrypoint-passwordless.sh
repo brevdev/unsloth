@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-# Custom Unsloth Entrypoint - Passwordless Jupyter
-# This replaces the default Unsloth entrypoint to disable Jupyter authentication
+# Custom Unsloth Entrypoint - authenticated Jupyter
+# The historical filename is retained for existing Compose configurations.
 
 # Mount NVIDIA driver libraries (works across different driver versions)
 # bash /workspace/scripts/mount-nvidia-libs.sh
@@ -12,7 +12,7 @@ set -e
 # export CUDA_HOME="/usr/local/cuda-12.8"
 
 echo "Exporting environment variables for SSH sessions..."
-printenv | grep -E '^HF_|^CUDA_|^NCCL_|^JUPYTER_|^SSH_|^PUBLIC_|^USER_|^UNSLOTH_|^PATH=|^LD_LIBRARY_PATH=' | \
+printenv | grep -E '^HF_|^CUDA_|^NCCL_|^JUPYTER_PORT=|^SSH_|^PUBLIC_|^USER_|^UNSLOTH_|^PATH=|^LD_LIBRARY_PATH=' | \
     sed 's/^\([^=]*\)=\(.*\)$/export \1="\2"/' > /tmp/unsloth_environment
 
 # Also explicitly set LD_LIBRARY_PATH and CUDA_HOME in bashrc
@@ -84,37 +84,9 @@ else
     echo "✓ SSH host keys already exist and appear valid"
 fi
 
-# Configure Jupyter - PASSWORDLESS MODE
-echo "Generating Jupyter configuration (PASSWORDLESS MODE)..."
-mkdir -p /home/unsloth/.jupyter
-
-python3 << 'EOFPYTHON'
-import os
-
-config_file = '/home/unsloth/.jupyter/jupyter_lab_config.py'
-
-config_content = f'''
-c.ServerApp.allow_root = False
-c.ServerApp.allow_remote_access = True
-c.ServerApp.open_browser = False
-c.ServerApp.ip = "0.0.0.0"
-c.ServerApp.port = {os.getenv('JUPYTER_PORT', '8888')}
-c.ServerApp.notebook_dir = "/workspace"
-c.ServerApp.terminado_settings = {{"shell_command": ["/bin/bash", "-l"]}}
-c.ServerApp.allow_origin = "*"
-
-# Disable authentication - passwordless access
-c.ServerApp.token = ""
-c.ServerApp.password = ""
-c.IdentityProvider.token = ""
-'''
-
-with open(config_file, 'w') as f:
-    f.write(config_content)
-
-print(f'✓ Jupyter configured for PASSWORDLESS ACCESS')
-print(f'✓ Config written to {config_file}')
-EOFPYTHON
+# Generate authenticated Jupyter configuration before starting supervisord.
+export JUPYTER_CONFIG_DIR=/home/unsloth/.jupyter
+python3 /workspace/scripts/configure_jupyter.py
 
 # Create SSH run directory - sshd looks for /run/sshd specifically
 echo "Setting up SSH prerequisites..."
